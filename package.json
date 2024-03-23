@@ -8,7 +8,9 @@
     "build"
   ],
   "dependencies": {
-    "@design-express/node-scripts": "1.0.4"
+    "@babel/plugin-proposal-private-property-in-object": "7.18",
+    "@design-express/node-scripts": "^1.1.9",
+    "file-system-access": "^1.0.4"
   },
   "scripts": {
     "start": "node-scripts start",

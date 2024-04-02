@@ -23,6 +23,8 @@ export class getFile extends Pure {
         values: getFile["@outputType"].values,
       }
     );
+    this.widgets_up = true;
+    this.widgets_start_y = 26;
   }
   onPropertyChanged(name, val, prev) {
     this.properties[name] = val;

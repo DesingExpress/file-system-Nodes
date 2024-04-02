@@ -1,5 +1,7 @@
 import { Pure } from "@design-express/fabrica";
 import { START_IN } from "../enum";
+import supported from "../supported";
+import openfileLegacy from "./legacy/openfile";
 
 export class filePicker extends Pure {
   static path = "FileSystem/File";
@@ -13,14 +15,15 @@ export class filePicker extends Pure {
       multiple: false,
       types: "any",
     };
-
-    this.addInput("onFail", -1);
+    this.addInput("", "", { hidden: true, locked: true });
+    this.addInput("", "", { hidden: true, locked: true });
     this.addInput("startIn", "string");
     this.addInput("allowAny", "boolean");
     this.addInput("multiple", "boolean");
     this.addInput("types", "array,string");
 
     this.addOutput("handler", "fs::filehandler,object,array");
+    this.addOutput("onFail", -1);
 
     this.addWidget("combo", "startIn", this.properties.startIn, "startIn", {
       values: START_IN,
@@ -30,19 +33,20 @@ export class filePicker extends Pure {
     this.addWidget("text", "types", this.properties.types, "types");
 
     this.widgets_up = true;
-    this.widgets_start_y = 24;
+    this.widgets_start_y = 50;
   }
 
   async onExecute() {
-    if (!window.showOpenFilePicker) {
-      this.triggerSlot(1);
-      return;
+    const isSupported = supported;
+    if (!isSupported) {
+      this.triggerSlot(2);
+      // return;
     }
-    const _types = (this.getInputData(5) ?? this.properties.types).trim();
+    const _types = (this.getInputData(6) ?? this.properties.types).trim();
     const opts = {
-      startIn: this.getInputData(2) ?? this.properties.startIn,
-      allowAny: this.getInputData(3) ?? this.properties.allowAny,
-      multiple: this.getInputData(4) ?? this.properties.multiple,
+      startIn: this.getInputData(3) ?? this.properties.startIn,
+      allowAny: this.getInputData(4) ?? this.properties.allowAny,
+      multiple: this.getInputData(5) ?? this.properties.multiple,
     };
     if (_types !== undefined) {
       if (
@@ -69,7 +73,19 @@ export class filePicker extends Pure {
         opts.types = { description: "", accept: _types };
       }
     }
-    const fileHandler = await window.showOpenFilePicker(opts);
-    this.setOutputData(1, opts.multiple ? fileHandler : fileHandler[0]);
+    const fileHandler = await (isSupported
+      ? window.showOpenFilePicker(opts)
+      : openfileLegacy({
+          multiple: opts.multiple,
+          mimeTypes: opts.types?.accept
+            ? Object.entries(opts.types.accept).map(([k, v]) =>
+                v.map((_v) => `${k}/${_v}`)
+              )
+            : "*/*",
+        }));
+    this.setOutputData(
+      1,
+      opts.multiple || !isSupported ? fileHandler : fileHandler[0]
+    );
   }
 }

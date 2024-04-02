@@ -1,11 +1,22 @@
 {
   "name": "@NEXIVIL/File-System",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": false,
   "description": "",
   "license": "MIT",
   "files": [
     "build"
+  ],
+  "summary": "Access files / Directories on the device file system — allows read, write and file management capabilities.",
+  "keywords": [
+    "file",
+    "directory",
+    "access",
+    "system",
+    "api",
+    "read",
+    "write",
+    "manage"
   ],
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "7.18",

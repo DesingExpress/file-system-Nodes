@@ -5,7 +5,7 @@ export class getFile extends Pure {
   static title = "GetFile";
   static [`@outputType`] = {
     type: "enum",
-    values: ["raw", "text", "arrayBuffer", "stream"],
+    values: ["raw", "text", "arrayBuffer", "stream", "node:buffer"],
   };
 
   constructor() {
@@ -36,7 +36,12 @@ export class getFile extends Pure {
           break;
         case "arrayBuffer":
           this.outputs[1].type = "arraybuffer";
-          this.outputs[1].label = "buffer";
+          this.outputs[1].label = "arraybuffer";
+          break;
+        case "node:buffer":
+          this.outputs[1].type =
+            "array,typedarray,uint8array,buffer,node:buffer";
+          this.outputs[1].label = "node:buffer";
           break;
         case "stream":
           this.outputs[1].type = "stream,object";
@@ -53,11 +58,13 @@ export class getFile extends Pure {
     const handler = this.getInputData(1);
     const dataType = this.getInputData(2) ?? this.properties.outputType;
     if (getFile["@outputType"].values.indexOf(dataType) < 0) return;
-    console.log(dataType);
+
     this.setOutputData(
       1,
       dataType === "raw"
         ? await handler.getFile()
+        : dataType === "node:buffer"
+        ? Buffer.from(await (await handler.getFile())["arrayBuffer"]())
         : await (await handler.getFile())[dataType]()
     );
   }

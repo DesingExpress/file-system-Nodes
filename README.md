@@ -18,6 +18,7 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
  │   └── Entries
  └── File
      ├── FilePicker
+     ├── saveFilePicker
      └── GetFile
 ```
 
@@ -29,11 +30,14 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
 {
   "title": "DirectoryPicker",
   "inputs": [
-    { "label": "onFail", "type":-1 },
+    { "label": "startIn", "type":"string" },
     { "label": "mode", "type":"string" }
-    ],
+  ],
   "outputs": [
-    { "label": "handler", "type":"fs::directoryhandler,object,array" }
+    { "label": "handler", "type":"fs::directoryhandler,object,array" },
+    { "label": "onNotSupported", "type":-1 },
+    { "label": "onFail", "type":-1 },
+    { "label": "failedInfo", "type":"object" }
   ]
 }
 ```
@@ -44,15 +48,17 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
 
 | Label       | Type     | Description |
 | ----------- | -------- | ----------- |
-| **onFail**  | `Event`  |             |
 | **startIn** | `string` |             |
 | **mode**    | `string` |             |
 
 ##### Outputs
 
-| Label       | Type                               | Description |
-| ----------- | ---------------------------------- | ----------- |
-| **handler** | `fs::filehandler`,`object`,`array` |             |
+| Label              | Type                                    | Description |
+| ------------------ | --------------------------------------- | ----------- |
+| **handler**        | `fs::directoryhandler`,`object`,`array` |             |
+| **onNotSupported** | `Event`                                 |             |
+| **onFail**         | `Event`                                 |             |
+| **failedInfo**     | `object`                                |             |
 
 ---
 
@@ -65,14 +71,16 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
 {
   "title": "FilePicker",
   "inputs": [
-    { "label": "onFail", "type":-1 },
     { "label": "startIn", "type":"string" },
     { "label": "allowAny", "type":"boolean" },
     { "label": "multiple", "type":"boolean" },
     { "label": "types", "type":"array,string" }
     ],
   "outputs": [
-    { "label": "handler", "type":"fs::filehandler,object,array" }
+    { "label": "handler", "type":"fs::filehandler,object,array" },
+    { "label": "onNotSupported", "type":-1 },
+    { "label": "onFail", "type":-1 },
+    { "label": "failedInfo", "type":"object" }
   ]
 }
 ```
@@ -83,7 +91,6 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
 
 | Label        | Type             | Description |
 | ------------ | ---------------- | ----------- |
-| **onFail**   | `Event`          |             |
 | **startIn**  | `string`         |             |
 | **allowAny** | `boolean`        |             |
 | **multiple** | `boolean`        |             |
@@ -91,9 +98,57 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
 
 ##### Outputs
 
-| Label       | Type                               | Description |
-| ----------- | ---------------------------------- | ----------- |
-| **handler** | `fs::filehandler`,`object`,`array` |             |
+| Label              | Type                               | Description |
+| ------------------ | ---------------------------------- | ----------- |
+| **handler**        | `fs::filehandler`,`object`,`array` |             |
+| **onNotSupported** | `Event`                            |             |
+| **onFail**         | `Event`                            |             |
+| **failedInfo**     | `object`                           |             |
+
+---
+
+&nbsp;
+&nbsp;
+
+### `SaveFilePicker` Node
+
+```litegraph
+{
+  "title": "SaveFilePicker",
+  "inputs": [
+    { "label": "startIn", "type":"string" },
+    { "label": "allowAny", "type":"boolean" },
+    { "label": "suggestedName", "type":"string" },
+    { "label": "types", "type":"array,string" }
+    ],
+  "outputs": [
+    { "label": "handler", "type":"fs::filehandler,object,array" },
+    { "label": "onNotSupported", "type":-1 },
+    { "label": "onFail", "type":-1 },
+    { "label": "failedInfo", "type":"object" }
+  ]
+}
+```
+
+#### Slots
+
+##### Inputs
+
+| Label             | Type             | Description |
+| ----------------- | ---------------- | ----------- |
+| **startIn**       | `string`         |             |
+| **allowAny**      | `boolean`        |             |
+| **suggestedName** | `string`         |             |
+| **types**         | `array`,`string` |             |
+
+##### Outputs
+
+| Label              | Type                               | Description |
+| ------------------ | ---------------------------------- | ----------- |
+| **handler**        | `fs::filehandler`,`object`,`array` |             |
+| **onNotSupported** | `Event`                            |             |
+| **onFail**         | `Event`                            |             |
+| **failedInfo**     | `object`                           |             |
 
 ---
 
@@ -101,8 +156,6 @@ Check the compatible browser on [MDN](https://developer.mozilla.org/en-US/docs/W
 &nbsp;
 
 ## Loadmap
-
-- showSaveFilePicker node
 
 ## Contributing
 

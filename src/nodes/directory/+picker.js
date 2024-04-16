@@ -22,7 +22,9 @@ export class directoryPicker extends Pure {
     this.addInput("mode", "string");
 
     this.addOutput("handler", "fs::directoryhandler,object");
+    this.addOutput("onNotSupported", -1);
     this.addOutput("onFail", -1);
+    this.addOutput("failedInfo", "object");
 
     this.addWidget("text", "startIn", this.properties.startIn, "startIn");
     this.addWidget("combo", "mode", this.properties.mode, "mode", {
@@ -42,7 +44,10 @@ export class directoryPicker extends Pure {
       startIn: this.getInputData(3) ?? this.properties.startIn,
       mode: this.getInputData(4) ?? this.properties.mode,
     };
-    const dirHandler = await window.showDirectoryPicker(opts);
+    const dirHandler = await window.showDirectoryPicker(opts).catch((e) => {
+      this.setOutputData(4, e);
+      this.triggerSlot(3);
+    });
     this.setOutputData(1, dirHandler);
   }
 }

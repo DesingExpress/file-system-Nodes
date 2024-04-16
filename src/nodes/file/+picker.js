@@ -23,7 +23,9 @@ export class filePicker extends Pure {
     this.addInput("types", "array,string");
 
     this.addOutput("handler", "fs::filehandler,object,array");
+    this.addOutput("onNotSupported", -1);
     this.addOutput("onFail", -1);
+    this.addOutput("failedInfo", "object");
 
     this.addWidget("combo", "startIn", this.properties.startIn, "startIn", {
       values: START_IN,
@@ -62,9 +64,10 @@ export class filePicker extends Pure {
           .split(",")
           .map((i) => i.trim())
           .forEach((i) => {
-            const [MIME, EXTs] = i.split("/");
+            const [MIME, _EXTs] = i.split(":");
+            const EXTs = (_EXTs ?? "").split(",").map((i) => `.${i.trim()}`);
             (opts.types.accept[MIME] ?? (opts.types.accept[MIME] = [])).push(
-              EXTs
+              ...EXTs
             );
           });
       } else if (typeof _types === "object" && !!_types.accept) {
@@ -73,16 +76,19 @@ export class filePicker extends Pure {
         opts.types = { description: "", accept: _types };
       }
     }
+    opts.types = [opts.types];
     const fileHandler = await (isSupported
       ? window.showOpenFilePicker(opts)
       : openfileLegacy({
           multiple: opts.multiple,
-          mimeTypes: opts.types?.accept
-            ? Object.entries(opts.types.accept).map(([k, v]) =>
-                v.map((_v) => `${k}/${_v}`)
-              )
+          mimeTypes: opts.types?.[0]?.accept
+            ? Object.values(opts.types[0].accept).flat(1)
             : "*/*",
-        }));
+        })
+    ).catch((e) => {
+      this.setOutputData(4, e);
+      this.triggerSlot(3);
+    });
     this.setOutputData(
       1,
       opts.multiple || !isSupported ? fileHandler : fileHandler[0]

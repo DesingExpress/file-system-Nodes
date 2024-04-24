@@ -1,5 +1,22 @@
 import { Pure } from "@design-express/fabrica";
 
+// https://stackoverflow.com/a/66500919
+async function verifyPermission(fileHandle, readWrite) {
+  const options = {};
+  if (readWrite) {
+    options.mode = "readwrite";
+  }
+  // Check if permission was already granted. If so, return true.
+  if ((await fileHandle.queryPermission(options)) === "granted") {
+    return true;
+  }
+  // Request permission. If the user grants permission, return true.
+  if ((await fileHandle.requestPermission(options)) === "granted") {
+    return true;
+  }
+  // The user didn't grant permission, so return false.
+  return false;
+}
 export class getFile extends Pure {
   static path = "FileSystem/File";
   static title = "GetFile";
@@ -58,14 +75,14 @@ export class getFile extends Pure {
     const handler = this.getInputData(1);
     const dataType = this.getInputData(2) ?? this.properties.outputType;
     if (getFile["@outputType"].values.indexOf(dataType) < 0) return;
-
-    this.setOutputData(
-      1,
-      dataType === "raw"
-        ? await handler.getFile()
-        : dataType === "node:buffer"
-        ? Buffer.from(await (await handler.getFile())["arrayBuffer"]())
-        : await (await handler.getFile())[dataType]()
-    );
+    if (await verifyPermission(handler))
+      this.setOutputData(
+        1,
+        dataType === "raw"
+          ? await handler.getFile()
+          : dataType === "node:buffer"
+          ? Buffer.from(await (await handler.getFile())["arrayBuffer"]())
+          : await (await handler.getFile())[dataType]()
+      );
   }
 }

@@ -6,6 +6,10 @@ async function verifyPermission(fileHandle, readWrite) {
   if (readWrite) {
     options.mode = "readwrite";
   }
+
+  if (!fileHandle) {
+    return false;
+  }
   // Check if permission was already granted. If so, return true.
   if ((await fileHandle.queryPermission(options)) === "granted") {
     return true;
@@ -31,6 +35,8 @@ export class getFile extends Pure {
     this.addInput("handler", "fs::filehandler,object");
     this.addInput("outputType", "string");
     this.addOutput("text", "string");
+    this.addOutput("empty", "");
+    this.addOutput("onError", -1);
     this.addWidget(
       "combo",
       "outputType",
@@ -75,14 +81,20 @@ export class getFile extends Pure {
     const handler = this.getInputData(1);
     const dataType = this.getInputData(2) ?? this.properties.outputType;
     if (getFile["@outputType"].values.indexOf(dataType) < 0) return;
-    if (await verifyPermission(handler))
-      this.setOutputData(
-        1,
-        dataType === "raw"
-          ? await handler.getFile()
-          : dataType === "node:buffer"
-          ? Buffer.from(await (await handler.getFile())["arrayBuffer"]())
-          : await (await handler.getFile())[dataType]()
-      );
+    if (await verifyPermission(handler)) {
+      try {
+        this.setOutputData(
+          1,
+          dataType === "raw"
+            ? await handler.getFile()
+            : dataType === "node:buffer"
+            ? Buffer.from(await (await handler.getFile())["arrayBuffer"]())
+            : await (await handler.getFile())[dataType]()
+        );
+      } catch (e) {
+        this.triggerSlot(3);
+        throw new Error("Not exist file in directory.");
+      }
+    }
   }
 }

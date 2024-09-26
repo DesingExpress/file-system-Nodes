@@ -3,6 +3,10 @@ import { Pure } from "@design-express/fabrica";
 // https://stackoverflow.com/a/66500919
 async function verifyPermission(fileHandle, readWrite) {
   const options = {};
+  if (fileHandle instanceof File) {
+    return true;
+  }
+
   if (readWrite) {
     options.mode = "readwrite";
   }
@@ -81,8 +85,8 @@ export class getFile extends Pure {
     const handler = this.getInputData(1);
     const dataType = this.getInputData(2) ?? this.properties.outputType;
     if (getFile["@outputType"].values.indexOf(dataType) < 0) return;
-    if (await verifyPermission(handler)) {
-      try {
+    try {
+      if (await verifyPermission(handler)) {
         this.setOutputData(
           1,
           dataType === "raw"
@@ -91,10 +95,17 @@ export class getFile extends Pure {
             ? Buffer.from(await (await handler.getFile())["arrayBuffer"]())
             : await (await handler.getFile())[dataType]()
         );
-      } catch (e) {
+        this.triggerSlot(0);
+      } else {
         this.triggerSlot(3);
-        throw new Error("Not exist file in directory.");
       }
+    } catch (e) {
+      console.error(e);
+      this.triggerSlot(3);
     }
+  }
+  async onAction() {
+    if (this.mode === 0) return;
+    await this.onExecute();
   }
 }
